@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Siper: piksel savaş oyunu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="game" width="320" height="180" aria-label="Oyun alanı"></canvas>
+  <div class="banner hidden" id="banner"></div>
+  <div class="tip hidden" id="tip"></div>
+
+  <div class="hud">
+    <span>Dalga <b id="hWave">1</b></span>
+    <span>Puan <b id="hScore">0</b></span>
+    <span>Kalan <b id="hLeft">0</b></span>
+    <span class="gold">Altın <b id="hGold">0</b></span>
+    <button id="btnShopHud" class="wpn hidden" type="button">Mağaza</button>
+    <button id="btnWeapon" class="wpn" type="button" aria-label="Silah değiştir">Tüfek</button>
+    <button id="btnMute" type="button">Ses</button>
+    <button id="btnPause" type="button" aria-label="Duraklat">II</button>
+  </div>
+
+  <div class="pad pad-move">
+    <div class="dpad" id="dpad" role="group" aria-label="Hareket ve yukarı nişan">
+      <span class="u" id="dU">▲</span><span class="l" id="dL">◀</span><span class="r" id="dR">▶</span>
+      <div class="knob" id="knob"></div>
+    </div>
+  </div>
+  <div class="pad pad-act">
+    <div class="acts">
+      <button class="act special" id="actSpecial" type="button">Destek</button>
+      <button class="act swap" id="actSwap" type="button">Silah</button>
+      <button class="act gren" data-k="gren" type="button">Bomba<span class="cnt" id="gCnt">3</span></button>
+      <button class="act jump" data-k="jump" type="button">Zıpla</button>
+      <button class="act fire" data-k="fire" type="button">Ateş</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="menu">
+    <h2>Siper</h2>
+    <p class="menu-desc">Dalga dalga gelen düşmanlara karşı mevzini koru. Kazandığın altınla yeni silahlar ve askerler al, silahlarını geliştir. Düşman sayısı her dalgada ikiye katlanır, 6. dalgadan sonra canavarlar uyanır. Her beş dalgada bir dev boss gelir.</p>
+    <div class="loadout"><span>Altın <b id="mGold">0</b></span><span>Asker <b id="mChar">Er Ali</b></span><span>Silah <b id="mWeapon">Tüfek</b></span><span>Rekor <b id="mBest">0</b></span></div>
+    <div class="modes" id="modes" role="group" aria-label="Oyun modu"></div>
+    <p class="keys only-keys">A D veya ok tuşları hareket, W yukarı nişan, Boşluk zıpla, J ateş, K el bombası, L hava desteği, Q silah değiştir, P duraklat, M ses.</p>
+    <p class="keys only-touch">Soldaki pedde başparmağını kaydırarak yürü, yukarı kaydırınca yukarı nişan alırsın. Sağdaki tuşlarla ateş et, zıpla, bomba at, silah değiştir. Destek çubuğu dolunca hava saldırısı çağır. En rahatı telefonu yan çevirmek.</p>
+    <div class="btns">
+      <button class="big" id="btnStart" type="button">Savaşa başla</button>
+      <button class="big alt" id="btnCoop" type="button">Arkadaşla oyna</button>
+      <button class="big alt" id="btnShopMenu" type="button">Mağaza</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="net">
+    <h2>Arkadaşla oyna</h2>
+    <p>İkiniz de oyunu kendi cihazınızda açın. Biriniz oda kursun, diğeri ekranda çıkan oda kodunu girsin. Mod ve dalgalar oda sahibininkine göre olur.</p>
+    <div class="btns"><button class="big" id="btnHost" type="button">Oda kur</button></div>
+    <div class="join"><input id="joinCode" maxlength="5" placeholder="KOD" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Oda kodu"><button class="big alt" id="btnJoin" type="button">Katıl</button></div>
+    <p class="netstatus" id="netStatus" role="status"></p>
+    <button class="big alt" id="btnNetBack" type="button">Geri</button>
+  </div>
+
+  <div class="overlay hidden" id="over">
+    <h2>Mevzi düştü</h2>
+    <p id="overText"></p>
+    <div class="btns">
+      <button class="big" id="btnAgain" type="button">Tekrar oyna</button>
+      <button class="big alt" id="btnShopOver" type="button">Mağaza</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="paused">
+    <h2>Duraklatıldı</h2>
+    <div class="btns">
+      <button class="big" id="btnResume" type="button">Devam et</button>
+      <button class="big alt" id="btnShopPause" type="button">Mağaza</button>
+      <button class="big alt" id="btnQuit" type="button">Ana menü</button>
+    </div>
+  </div>
+
+  <div class="overlay shop hidden" id="shop">
+    <div class="shop-head"><h2>Mağaza</h2><span class="goldtag">Altın <span id="sGold">0</span></span></div>
+    <p id="shopNote" class="keys"></p>
+    <div class="tabs" id="tabs">
+      <button type="button" data-tab="weapons">Silahlar</button>
+      <button type="button" data-tab="chars">Askerler</button>
+      <button type="button" data-tab="supply" id="tabSupply">İkmal</button>
+    </div>
+    <div class="cards" id="cards"></div>
+    <button class="big" id="shopClose" type="button">Geri</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
